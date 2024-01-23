@@ -1,0 +1,40 @@
+---
+title: "Scraping PDFs"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+library(pdftools)
+library(tidyverse)
+library(glue)
+
+download.file("http://arxiv.org/pdf/1403.2805.pdf", "data/1403.2805.pdf", mode = "wb")
+txt <- pdf_text("data/1403.2805.pdf")
+cat(txt[1])
+```
+
+
+Downloading multiple pdf documents, then extracting and cleaning data stored in a table
+
+```{r}
+country <- c("chn", "usa", "gbr", "jpn")
+url <- "http://www.who.int/diabetes/country-profiles/{country}_en.pdf?ua=1"
+
+urls <- glue(url)
+pdf_names <- glue(here::here("data/report_{country}.pdf"))
+
+# download pdfs
+walk2(urls, pdf_names, download.file, mode = "wb")
+
+raw_text <- map(pdf_names, pdf_text)
+
+```
+
+
+```{r}
+str(raw_text)
+```
+

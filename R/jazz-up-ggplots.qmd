@@ -1,0 +1,167 @@
+---
+title: "Jazz up ggplots (USGS Data Viz tutorial)"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+# Run to install all packages needed in script
+# install.packages(c('tidyverse', 'remotes','showtext', 'sysfonts', 'cowplot',
+# 'dataRetrieval', 'geomtextpath', 'ggimage', 'rnpn', 'terra', 'raster', 'sf',
+# 'colorspace', 'lubridate', 'geofacet', 'ggfx','gghighlight', 'gganimate',
+# 'snotelr', 'sbtools', 'spData'))
+
+# Install waffle using `remotes`
+# remotes::install_github("hrbrmstr/waffle")
+
+# Load `tidyverse` (other packages will be loaded in the examples below)
+library(tidyverse)
+
+
+```
+
+## Add a custom theme and fonts to ggplot using theme elements and showtext 
+
+```{r}
+library(showtext) # For fonts
+
+# Supply custom fonts using `showtext` 
+font_legend <- 'Merriweather Sans'
+font_add_google(font_legend)
+annotate_text <-"Shadows Into Light"
+font_add_google(annotate_text)
+showtext_opts(dpi = 300, regular.wt = 300, bold.wt = 800)
+showtext_auto(enable = TRUE)
+
+
+# Custom plotting theme to apply to waffle chart below
+theme_fe <- function(text_size = 16, font_legend){
+  theme_void() +
+  theme(text = element_text(size = text_size, family = font_legend, 
+                            color = "black", face = "bold"),
+        strip.text = element_text(size = text_size, margin = margin(b = 10)),
+        legend.key.width = unit(0.75, "cm"),
+        legend.key.height = unit(0.75, "cm"),
+        legend.spacing.x = unit(0.65, 'cm'),
+        legend.title = element_text(size = text_size*1.5, hjust = 0.5),
+        legend.direction = "horizontal",
+        legend.position = "top", 
+        plot.title = element_text(size = text_size*2, hjust = 0.5, margin = margin(t = -10)),
+        plot.subtitle = element_text(size = text_size*1.2, hjust = 0.5),
+        plot.margin = unit(c(2, -25, 2, -25), "cm"),
+        strip.text.x = element_text(hjust = .5),
+        panel.spacing = unit(1, "lines"))
+}
+
+```
+
+
+```{r}
+library(cowplot) # For laying out the final plot
+library(grid) # For laying out the final plot
+library(waffle) 
+
+# Read in groundwater trends data
+thresholds <- readr::read_csv('https://labs.waterdata.usgs.gov/visualizations/23_chart_challenge/threshold_decadal_gw_reg.csv', show_col_types = FALSE)  
+
+# Prep data for plotting
+thresholds_fe <- thresholds |> 
+  filter(parameter %in% c("Fe")) |> # Filter to Iron
+  group_by(parameter, region, bins) |> 
+  summarise(count_bins_sum = sum(count_bins),
+            count_obs_sum = sum(count_obs))  |> 
+  mutate(ratio = round(count_bins_sum/count_obs_sum*100)) |> # Ratio of bins to observations
+  # Capitalize region labels
+  mutate(region = str_to_title(gsub(",", " ", region))) |> 
+  arrange(match(bins, c("high", "moderate", "low")))
+
+# Plot
+plot_fe <- thresholds_fe |> 
+  ggplot(aes(values = ratio, fill = bins)) +
+  geom_waffle(color = "white", size = 1.125, n_rows = 10, 
+              make_proportional = TRUE,
+              stat = "identity", na.rm = TRUE) +
+  facet_wrap(~factor(region, levels = c("West", "Central", "Midwest", "East"))) +
+  coord_equal(clip = "off") + 
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_fill_manual(values = c('#36161a', "#b54a56","#e9c9cc"), 
+                    breaks = c('high', 'moderate', 'low'), 
+                    labels = c("High", "Moderate", "Low"),
+                    name = NULL) +
+  labs(title = "Fe",
+       subtitle = "Concentration" ) +
+  theme_fe(text_size = 18, font_legend = font_legend) +
+  guides(fill = guide_legend(title.position = "top"))
+
+```
+
+
+```{r}
+library(cowplot) # For laying out the final plot
+library(grid) # For laying out the final plot
+library(waffle) 
+
+# Color scheme
+background_color = '#FFFFFF'
+font_color = "#000000"
+
+# Background
+canvas <- grid::rectGrob(
+  x = 0, y = 0,
+  width = 16, height = 9,
+  gp = grid::gpar(fill = background_color, alpha = 1, col = background_color)
+)
+
+# Margins
+plot_margin <- 0.05
+
+# Filter to East region to add annotation
+thesholds_fe_east <- thresholds_fe |> filter(region == 'East')
+
+# Plot arrow with `geom_curve`
+plot_fe_arrow <- ggplot() + 
+  theme_void() +
+  # add arrow using `geom_curve()`
+  geom_curve(data = thesholds_fe_east,
+             aes(x = 13, y = 5,
+                 xend = 11, yend = 3),
+             arrow = grid::arrow(length = unit(0.5, 'lines')), 
+             curvature = -0.3, angle = 100, ncp = 10,
+             color ='black')
+
+# Combine all plot elements and add annotation 
+ggdraw(ylim = c(0,1), # 0-1 bounds make it easy to place viz items on canvas
+       xlim = c(0,1)) +
+  # a background
+  draw_grob(canvas,
+            x = 0, y = 1,
+            height = 12, width = 12,
+            hjust = 0, vjust = 1) +
+  # the main plot
+  draw_plot(plot_fe,
+            x = plot_margin - 0.1,
+            y = plot_margin,
+            height = 0.94,
+            width = 0.94) +
+  draw_plot(plot_fe_arrow,
+            x = plot_margin + 0.72,
+            y = plot_margin + 0.16,
+            height = plot_margin + 0.03,
+            width = plot_margin + 0.04) +
+  # annotation for arrow
+  draw_label("Fe deposits in\nnearby limestone\n and dolomite",
+             fontfamily = annotate_text,
+             x =  plot_margin + 0.82,   
+             y = plot_margin + 0.3,
+             size = 28,
+             color = "black")
+
+# Save figure 
+ggsave(here::here("plots","geomcurve.png"), width = 12, height = 12, dpi = 300, bg = "white")
+
+```
+
+

@@ -1,0 +1,86 @@
+---
+title: "Threats to Birds"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(showtext)
+```
+
+
+```{r}
+url <- "https://www.fws.gov/library/collections/threats-birds"
+html <- read_html(url)
+
+table <- html |> 
+  html_element("table") |> 
+  html_table() |> 
+  janitor::clean_names()
+table
+
+```
+
+
+```{r}
+
+table <- table |> 
+  mutate(across(c(2:4), ~case_when(.x=="N/A"~NA_character_,.x==""~NA_character_,TRUE ~ .x))) |> 
+  mutate(across(c(2:4), ~gsub(",", "", .x))) |> 
+  mutate(across(c(2:4), ~as.numeric(.x))) 
+
+table <- table |> 
+  filter(! str_detect(hazard_type, "All")) |> 
+  mutate(group = ifelse(str_detect(hazard_type, "Cats"), "Cats", "Other")) |> 
+  # mutate(group = case_when(
+  #   str_detect(hazard_type, "Cats") ~ "Cats", 
+  #   str_detect(hazard_type, "VehiclesLoss") ~ "Vehicle", 
+  #   
+  # ))
+  mutate(hazard_type = case_when(
+    hazard_type == "Habitat Loss/Conversion" ~ "Habitat loss and conversion",
+    hazard_type == "Collision - Building GlassLoss et al. 2014a" ~ "Collisions - Building glass",
+    hazard_type == "Collisions - Communication towersLongcore et al. 2012" ~ "Collisions - Comms towers",
+    hazard_type == "Collisions - Electrical linesLoss et al. 2014c" ~ "Collisions - Electrical lines",
+    hazard_type == "Collision - VehiclesLoss et al. 2014b" ~ "Collisions - Vehicles",
+    hazard_type == "Collisions - Land-based Wind TurbinesLoss et al. 2013b" ~ "Collisions - Land-based wind",
+    hazard_type == "Collisions - Offshore Wind Turbines" ~ "Collisions - Offshore wind",
+    hazard_type == "Collisions - Solar Panels" ~ "Collisions - solar panels",
+    hazard_type == "Burning -Solar Towers" ~ "Solar towers",
+    hazard_type == "ElectrocutionsLoss et al. 2014c" ~ "Electrocutions",
+    hazard_type == "CatsLoss et al. 2013a" ~ "Cats",
+    hazard_type == "Oil PitsTrail 2006" ~ "Oil pits",
+    hazard_type == "Industry only(excludes cats and vehicles)" ~ "Industry (excludes cats and vehicles)",
+    TRUE ~ hazard_type
+  ))
+
+table |> 
+  filter(! is.na(median_avg_estimated)) |>
+  arrange(desc(median_avg_estimated)) |> 
+  ggplot(aes(fct_reorder(hazard_type, median_avg_estimated), median_avg_estimated)) + 
+  geom_bar(aes(fill = group), stat = "identity") + 
+  geom_text(aes(label=scales::comma(median_avg_estimated)), vjust=0, hjust=-.2) + 
+  coord_flip() + 
+  scale_y_continuous(labels = scales::label_comma(), limits = c(0,3e+09), expand = c(0, 0)) + 
+  scale_fill_manual(values = c("red", "green4")) + 
+  labs(
+    title = "**Cats, not wind fields, are killing birds**",
+    subtitle = "Annual estimated bird mortality from selected anthropogenic causes in the U.S.",
+    x = "", y = ""
+  ) + 
+  theme_classic() + 
+  theme(
+    legend.position = "none",
+    axis.text.x = element_blank(), 
+    axis.ticks = element_blank(), 
+    axis.line.x = element_blank(),
+    plot.title = element_markdown(size = 18),
+    plot.subtitle = element_text(size = 14, margin = margin(0,0,20,0)),
+    plot.title.position = "plot"
+  )
+
+```
+
