@@ -6,6 +6,7 @@ library(scales)
 library(ggrepel)
 library(patchwork)
 library(ggsci)
+library(magick)
 
 
 
@@ -23,13 +24,13 @@ p1 <- fs_budget |>
   ggplot(aes(x=year, y=budget, color=Appropriations)) +
   geom_vline(xintercept = 2023, linetype="dashed", color = "grey") +
   annotate(
-    "text", x = 2022.3, y = 3100000, size = 4,
+    "text", x = 2022.1, y = 3100000, size = 4,
     label = "Actual", color = "grey") +
   annotate(
-    "text", x = 2024, y = 3100000, size = 4,
+    "text", x = 2024.25, y = 3100000, size = 4,
     label = "Estimates", color = "grey") +
-  geom_point(size = 2.5) +
-  geom_line(size = 1.25) +
+  geom_point(size = 2) +
+  geom_line(size = 1) +
   scale_color_lancet() +  
   scale_x_continuous(
     breaks = seq(2011,2024,1),
@@ -37,8 +38,9 @@ p1 <- fs_budget |>
     expand = c(0.01,0)
   ) +
   scale_y_continuous(
+    limits = c(0,3250000),
     labels = label_number(scale_cut = cut_short_scale()), 
-    expand = c(0.01,0)
+    expand = c(0.01,0.01)
   ) +
   labs(
     x = "", y = "",
@@ -62,7 +64,7 @@ p1 <- fs_budget |>
   geom_text_repel(
     data = fs_budget |> filter(!is.na(label)),
     aes(label = paste0("  ", label)),
-    size = 5,
+    size = 4,
     segment.curvature = -0.1,
     segment.square = TRUE,
     box.padding = 0.1,
@@ -78,10 +80,18 @@ p1 <- fs_budget |>
   )
 p1
 
-# ggsave("plots/fs-budget.png",
-#        width = 7, height = 4, scale = 1.5, 
-#        bg = "white"
-# )
+# image_read_svg(here::here("img","USFS-logo.png"))
+# logo <- png::readPNG(here::here("img","USFS-logo.png"))
+# image <- image_fill(logo, 'none')
+# raster <- as.raster(image)
+# myplot <- qplot(mpg, wt, data = mtcars)
+# myplot + annotation_raster(raster, 25, 35, 3, 5)
+
+
+ggsave("plots/fs-budget.png",
+       width = 5, height = 3, scale = 1.7,
+       bg = "white"
+)
 
 
 p2 <- fs_budget |> 
@@ -149,11 +159,11 @@ p2
 #        bg = "white"
 # )
 
-p1 + p2 + 
-  plot_layout(widths = c(1.3, 1))
-
-ggsave("plots/fs-budget-panel.png",
-       width = 12, height = 4, scale = 1.7, 
-       bg = "white"
-)
+# p1 + p2 + 
+#   plot_layout(widths = c(1.3, 1))
+# 
+# ggsave("plots/fs-budget-panel.png",
+#        width = 12, height = 4, scale = 1.7, 
+#        bg = "white"
+# )
   
