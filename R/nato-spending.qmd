@@ -121,8 +121,7 @@ df_plot |>
 ```{r}
 #| label: save-plot
 #| 
-path <- here::here("plots", "nato-spending", "spending-per-country-by-gdp")
-
+path <- here::here("plots", "spending-per-country-by-gdp")
 ggsave(paste0(path, ".png"), width = 5, height = 7, dpi = 600)
 # ggsave(paste0(path, "_sd.png"), width = 17, height = 11, dpi = 250)
 # ggsave(paste0(path, ".pdf"), width = 17, height = 11, device = cairo_pdf)
