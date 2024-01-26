@@ -11,10 +11,11 @@ editor_options:
 
 library(tidyverse)
 library(here)
+library(scales)
 
-theme_name = "theme_oppenheimer" # Pick which theme you want
-theme_url = paste0("https://raw.githubusercontent.com/MatthewBJane/theme_park/main/", theme_name ,".R")
-devtools::source_url(theme_url)
+# theme_name = "theme_oppenheimer" # Pick which theme you want
+# theme_url = paste0("https://raw.githubusercontent.com/MatthewBJane/theme_park/main/", theme_name ,".R")
+# devtools::source_url(theme_url)
 ```
 
 
@@ -28,6 +29,7 @@ rent_growth_YoY <- read_csv(here("data", "Apartment_List_Rent_Growth_YoY_2023_06
 
 ```
 
+Look at rents in Madison, WI
 
 ```{r}
 #| label: rent-estimates-madison
@@ -41,25 +43,29 @@ rent_est_long <- rent_est_long |> mutate(date = ym(date))
 
 # plot
 title_text <- "Monthly estimates of the median rent paid for new leases in Madison, WI"
+subtitle_text <- "Median Rent (US Dollars)"
 caption_text <- "Data: Census Bureau’s American Community Survey via Apartment List | By Bryan Maitland"
 
 rent_est_long |> 
   drop_na() |> 
   ggplot(aes(date, med_rent)) + 
-  geom_line(color = text_color_barbie) + 
+  geom_line() + 
   scale_x_date(date_breaks = "year", date_labels = "%Y") +
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())) +
   labs(
     title = title_text, 
-    x = "", 
-    y = "Median Rent", 
+    subtitle = subtitle_text,
+    x = "", y = "", 
     caption = caption_text
     ) + 
-  theme_barbie(barbie_font = TRUE) +
-  # theme_oppenheimer(zelda_font = TRUE) + 
+  theme_minimal() +
   theme(
     plot.title.position = "plot", 
     plot.title = element_text(margin = margin(b = 10)), 
-    plot.caption = element_text(size = 12)
+    plot.caption = element_text(size = 12), 
+    panel.grid.minor = element_blank(), 
+    panel.grid.major.x = element_blank()
   ) 
 ```
 
