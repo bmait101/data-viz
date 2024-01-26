@@ -2,7 +2,7 @@
 
 # download from https://www.ncei.noaa.gov/access/paleo-search/study/26430
 
-devtools::install_github("dill/emoGG")
+# devtools::install_github("dill/emoGG")
 
 library(readxl)
 library(ggplot2)
@@ -11,7 +11,7 @@ library(ggpubr)
 library(lubridate)
 
 cherry <- read_xls(
-  path = here::here("KyotoFullFlowerW.xls"), 
+  path = here::here("data", "KyotoFullFlowerW.xls"), 
   col_names = TRUE, col_types = c("numeric", "numeric", "numeric", "text", "text"), 
   range = "A16:E1226"
   )
@@ -21,7 +21,7 @@ colnames(cherry)[1:2] <- c("year", "yday")
 
 emoji_search(search = "flower")  # code: 1f338
 
-fuji <- png::readPNG(here::here("fuji.png"))
+fuji <- png::readPNG(here::here("img", "fuji.png"))
 
 y.date <- parse_date_time(c("3-20","4-1","4-10","4-20","5-1","5-10"), orders = "md")
 y.ticks <- yday(y.date)
@@ -40,3 +40,7 @@ p <- ggplot(data = cherry, aes(x = year, y = yday)) +
   scale_x_continuous(name = "Year", breaks = c(812,1000,1250,1500,1750,2000), expand = c(.01,0))
 p
 
+ggsave("plots/cherry-blossom.png",
+       width = 5, height = 3, scale = 1.7,
+       bg = "white"
+)
