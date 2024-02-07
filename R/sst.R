@@ -77,7 +77,7 @@ sst_df <- sst_df |>
 cc <- scales::seq_gradient_pal("lightblue", "blue", "Lab")(seq(0,1,length.out=47))
 
 # plot
-sst_df |> 
+p1 <- sst_df |> 
   filter(! year %in% c(2023, 2024)) |> 
   ggplot(aes(x = doy, y = temp_c, color = year)) +
   geom_line() +
@@ -96,6 +96,7 @@ sst_df |>
   theme(
     axis.text.x = element_blank()
     )
+p1
 
 # save the plot
 ggsave("plots/sst.png", width = 10, height = 6, units = "in", dpi = 300)
