@@ -1,4 +1,5 @@
 # Read in the JSON data from the Climate Reanalyzer API
+# By: Bryan Maitland
 
 # Load libraries
 library(tidyverse)
