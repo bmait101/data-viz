@@ -1,0 +1,94 @@
+---
+title: "Compound Interest Rates"
+output:
+  html_notebook: default
+editor_options:
+  chunk_output_type: console
+---
+
+The compound interest rate is the most powerful mathematical force in the financial world. It shows how money can grow inevitable and powerfully into the future...
+
+First, lets create a function that describes compound interest:
+```{r}
+compound_int <- function(PV, Yeild, N) {
+  PV * (1 + Yeild) ^ N  # compound interest formula
+  }
+```
+
+### Examples to illustate compound interest
+#### Feral Kittens
+Lets say that we have 4 feral kittens terroizing your backyard. On an annual basis, the kitten population will grow by 50%. After 10 years, how many kittens will we have?
+```{r}
+compound_int(PV = 1, Yeild = 0.2, N = 35)
+```
+
+230 is a lot a kittens...
+
+#### Snowball example
+We have a quarter pound snowball that starts rolling down Mt. Everest. This snowball gains weight at rate of 10% for every 10 yards. How heavy will the snowball be after rolling 1 mile down and falling off a cliff?
+
+```{r}
+# There are 1,760 yars per mile, growth occurs every 10 yards, 
+# so it rolls 176 yards. 
+
+compound_int(PV = 0.25, Yeild = 0.10, N = 176)
+```
+
+Phew, 4.8 million pounds after 1 mile, starting from 1/4 pound. Point being you can start small and end up very, very big. 
+
+#### Real money
+So, if we started with $1, continually invested for 500 years with a 5% growth rate would yeild:
+```{r}
+compound_int(PV = 1, Yeild = 0.05, N = 500)
+```
+Whoa, 39 BILLION, with a B. 
+
+These extreme examples and assumptions illustrate the extremes that compound growth can get to. 
+
+
+### Real examples
+
+#### Growth on my IRA
+Lets say im 30, and have 5,000 I can contribute to my IRA account. What will that 5,000 look like when I retire at 70?
+```{r}
+PV = 5000  # initial contribution
+Yeild = 0.10  # interest rate or return
+N = 40  # number of compounding periods
+compound_int(PV = PV, Yeild = Yeild, N = N)
+```
+
+The future value of my 5,000 would be 108,622. Not bad. And if you also contributed and additional 5,000 every year for 10-15 years, I could be a millionaire in old age. 
+
+### Takeaways
+The compound interest formula can explain the growth of inflation as in rental costs, to government debt, to credit card payments over time. Or, how modest contribitions to a retirement account at an early age can guarantee we become millionaires. 
+
+## More-often-than-annual-compounding
+Many things compound more than anually:
++ Bonds - 2/yr
++ Dividend stocks - 4/yr
++ Ferral kittens - 6/yr 
++ credit card debt - 12/yr
+
+So, we must make our formula a little more complicated:
+PV = principal amount
+Yeild = interest rate/yeild/return
+Time = Time period in years
+N = number of compounding periods per year
+
+```{r}
+compound_int_2 <- function(PV, Yeild, N, Time) {
+  PV * (1 + (Yeild / N)) ^ (N * Time)  # compound interest formula
+  }
+```
+
+So lets compare simple annual compounding:
+```{r}
+compound_int(PV = 50, Yeild = 0.04, N = 40)
+```
+
+With more-than-annual compounding:
+```{r}
+compound_int_2(PV = 50, Yeild = 0.04, N = 4, Time = 40)
+```
+
+Its ~2.3% larger than with simple annual compounding. Point being, this is why bonds and divident accounts are great, and how credit card companies screw us...
