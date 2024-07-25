@@ -2,6 +2,7 @@
 
 #load libraries
 library(tidyverse) 
+library(googlesheets4)
 library(scholar) 
 library(easyPubMed)
 library(ggrepel)
@@ -30,7 +31,8 @@ get_oldest_article(id)
 
 # Publication history =====================================================
 
-## Get my publications
+## Get my publications --------------------------------
+
 pubs <- get_publications(id) |> as_tibble()
 pubs |> head()
 # Need to remove the AGU abstract, but keep theses and reports even though they are names "journals"
@@ -44,7 +46,8 @@ pubs <- pubs |>
   mutate(id = row_number()) |> 
   relocate(id, .before = title)
 
-## Get journal impact factors
+## Get journal impact factors --------------------------------
+
 # Rename Elementa: Science of the Anthropocene to Elementa to get the SJR ranks
 pubs$journal <- ifelse(pubs$journal == "Elementa: Science of the Anthropocene", "Elementa", pubs$journal)
 
@@ -64,6 +67,25 @@ pubs <- mutate(pubs, sjr = ifelse(journal == "Journal of Contemporary Water Rese
 
 # Rename Elementa again to get the impact factor
 pubs$journal <- ifelse(pubs$journal == "Elementa", "Elementa: Science of the Anthropocene", pubs$journal)
+
+# Get IFs from googsheets 
+# gs4_deauth()
+# j_if_eco <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "ecology")
+# j_if_evo <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "evolution")
+# j_if_con <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "conservation")
+# j_if_aqu <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "aquatic")
+# 
+# j_if_eco |> mutate(across(
+#   where(is.list),
+#   # list conversion to char leaves "NULL" entries > TRICKY: NULLs convert to NA
+#   ~ as.character(.x) %>% 
+#     na_if("NULL") %>% 
+#     as.numeric))
+# j_if_eco %>% 
+#   mutate(`Impact Factor` = map_dbl(`Impact Factor`, as.double)) |> print(n=Inf)
+# 
+# # bind the sheets
+# j_if <- bind_rows(j_if_eco, j_if_evo, j_if_con, j_if_aqu) 
 
 
 ## Add peer-review and first author tags
