@@ -69,23 +69,23 @@ pubs <- mutate(pubs, sjr = ifelse(journal == "Journal of Contemporary Water Rese
 pubs$journal <- ifelse(pubs$journal == "Elementa", "Elementa: Science of the Anthropocene", pubs$journal)
 
 # Get IFs from googsheets 
-# gs4_deauth()
-# j_if_eco <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "ecology")
-# j_if_evo <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "evolution")
-# j_if_con <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "conservation")
-# j_if_aqu <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "aquatic")
-# 
-# j_if_eco |> mutate(across(
-#   where(is.list),
-#   # list conversion to char leaves "NULL" entries > TRICKY: NULLs convert to NA
-#   ~ as.character(.x) %>% 
-#     na_if("NULL") %>% 
-#     as.numeric))
-# j_if_eco %>% 
-#   mutate(`Impact Factor` = map_dbl(`Impact Factor`, as.double)) |> print(n=Inf)
-# 
-# # bind the sheets
-# j_if <- bind_rows(j_if_eco, j_if_evo, j_if_con, j_if_aqu) 
+gs4_deauth()
+j_if_eco <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "ecology")
+j_if_evo <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "evolution")
+j_if_con <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "conservation")
+j_if_aqu <- read_sheet("https://docs.google.com/spreadsheets/d/1uG2Dg0LogysCSAsK51Rh9lD_dxRRFOeo2jq92_TwqF0/edit?gid=0#gid=0", range = "aquatic")
+
+j_if_eco |> mutate(across(
+  where(is.list),
+  # list conversion to char leaves "NULL" entries > TRICKY: NULLs convert to NA
+  ~ as.character(.x) %>%
+    na_if("NULL") %>%
+    as.numeric))
+j_if_eco %>%
+  mutate(`Impact Factor` = map_dbl(`Impact Factor`, as.double)) |> print(n=Inf)
+
+# bind the sheets
+j_if <- bind_rows(j_if_eco, j_if_evo, j_if_con, j_if_aqu)
 
 
 ## Add peer-review and first author tags
@@ -130,7 +130,7 @@ p1v1 <- pubs |>
     axis.text.y = element_text(size=9,color="grey30"),
     plot.title = element_text(color="grey40",face = "bold",size=12),
     plot.subtitle = element_text(color="grey40",face = "bold",size=10, vjust = 0),
-    legend.position = c(0.6,0), 
+    legend.position.inside = c(0.6,0), 
     legend.text= element_text(size=9,color="grey30")
   )
 p1v1
