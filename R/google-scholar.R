@@ -4,7 +4,6 @@
 library(tidyverse) 
 library(googlesheets4)
 library(scholar) 
-# library(easyPubMed)
 library(ggrepel)
 library(lemon)
 # library(cowplot) 
@@ -228,9 +227,7 @@ ggsave("plots/google-scholar.png",
 )
 
 
-# Indivdual article history ================================
-
-as.character(df$title[5])
+# Individual article history ================================
 
 ## Get article citation history
 ach <- get_article_cite_history(id, pubs$pubid[5])
@@ -239,6 +236,39 @@ ach <- get_article_cite_history(id, pubs$pubid[5])
 ggplot(ach, aes(year, cites)) +
   geom_segment(aes(xend = year, yend = 0), linewidth = 1, color='darkgrey') +
   geom_point(size=3, color='firebrick')
+
+
+# now do it for all articles
+ach <- 
+  pubs$pubid |> 
+  map_df(~get_article_cite_history(id, .)) |> 
+  as_tibble()
+
+# get journal names for each article
+ach <- 
+  ach |> 
+  left_join(pubs |> select(pubid, journal, type, author), by = c("pubid" = "pubid")) 
+
+# plot citation trend for each article
+ach |> 
+  ggplot() +
+  geom_segment(aes(x=year, xend=year, y=0, yend=cites), color="grey") +
+  geom_point(aes(x=year, y=cites, color=type), size=2) +
+  facet_wrap(~pubid, scales = "free_y", ncol = 3) +
+  labs(
+    title = "Citation history by article",
+    x = "", y = ""
+  ) +
+  theme(
+    axis.title.x = element_text(angle=0,color="black",hjust = 0.05,size=11),
+    axis.text.x = element_text(size=9,color="grey30"),
+    axis.line.y = element_blank(),
+    panel.grid.major.y = element_line(color="grey",linetype = 3),
+    axis.title.y.left = element_blank(), 
+    axis.text.y = element_text(size=9,color="grey30"),
+    plot.title = element_text(color="grey40",face = "bold",size=12),
+    plot.subtitle = element_text(color="grey40",face = "bold",size=10, vjust = 0)
+  )
 
 
 
