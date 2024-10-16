@@ -1,21 +1,20 @@
 # Analyze and visualize Google Scholar data
 
-#load libraries
+# libraries
 library(tidyverse) 
 library(googlesheets4)
 library(scholar) 
 library(ggrepel)
 library(lemon)
-# library(cowplot) 
 library(patchwork)
 
 # Get data =============================================
 
-# Define the id for Bryan Maitland
+# Definitions
 id <- "tGn-FzAAAAAJ" 
 Author_lastname <- c("Maitland")
 
-# Get my profile information
+# Get profile information
 profile <- get_profile(id)
 
 # List of scholar functions
@@ -27,14 +26,15 @@ profile <- get_profile(id)
 # get_num_top_journals(id)
 # get_oldest_article(id)
 
-
 # Publication history =====================================================
 
 # Get my publications
-pubs <- get_publications(id) |> as_tibble() |> arrange(year)
+pubs <- get_publications(id) |> 
+  as_tibble() |> 
+  arrange(year)
 
-# Remove the conference abstracts, but keep all reports and theses
-pubs <- pubs |> filter(pubid != "g5m5HwL7SMYC")
+# Remove the conference abstracts
+pubs <- filter(pubs, pubid != c("g5m5HwL7SMYC", "SeFeTyx0c_EC"))
 
 # Add a column for the publication type
 pubs <- pubs |> 
@@ -42,7 +42,7 @@ pubs <- pubs |>
     pubid %in% c("-f6ydRqryjwC","JV2RwH3_ST0C") ~ "Thesis",
     pubid %in% c("7PzlFSSx8tAC","pqnbT2bcN3wC") ~ "Report",
     TRUE ~ "Refereed"
-  )) |> print(n=Inf)
+  ))
 
 
 # Tag first-author papers
@@ -103,9 +103,14 @@ pubs <- mutate(pubs, sjr = ifelse(pubid == "BqipwSGYUEgC", 0.2, sjr))
 p1 <- pubs |> 
   mutate(first = as.character(first)) |>
   ggplot(aes(y = sjr, x = year)) +
-  geom_point(aes(fill = sjr, stroke = first), size=4, shape=21, na.rm = TRUE) +
-  scale_discrete_manual(aesthetics = "stroke", values = c("0" = 1, "1" = 2), guide = "none") + 
-  scale_fill_gradient2(low="grey70",mid="khaki3",high="deepskyblue3", guide = "none") +
+  geom_point(
+    aes(fill = sjr, stroke = first), 
+    size=4, shape=21, na.rm = TRUE
+    ) +
+  scale_discrete_manual(
+    aesthetics = "stroke", values = c("0" = 1, "1" = 2), guide = "none") + 
+  scale_fill_gradient2(
+    low="grey70",mid="khaki3",high="deepskyblue3", guide = "none") +
   cowplot::theme_cowplot() +
   lemon::coord_capped_cart(bottom = 'both') +
   scale_x_continuous(
@@ -135,7 +140,9 @@ p1
 p2 <- pubs |> 
   ggplot(aes(x = year, fill = type)) +
   geom_bar(position = "stack", width = 0.75) + 
-  scale_fill_manual(values = c("Refereed" = "grey10", "Thesis" = "grey90", "Report" = "grey50")) + 
+  scale_fill_manual(
+    values = c("Refereed" = "grey10", "Thesis" = "grey90", "Report" = "grey50")
+    ) + 
   cowplot::theme_cowplot() +
   coord_capped_cart(bottom='both')+
   # add x labels for each year
@@ -155,7 +162,8 @@ p2 <- pubs |>
     axis.title.y.left = element_blank(), 
     axis.text.y = element_text(size=9,color="grey30"),
     plot.title = element_text(color="grey40",face = "bold",size=12),
-    legend.position = c(0.05, .9), 
+    legend.position = "inside",
+    legend.position.inside = c(0.05, .85), 
     legend.text= element_text(size=9,color="grey30")
   )
 p2
@@ -177,16 +185,22 @@ ggplot(citation_history, aes(year, cites)) +
 # nice plot
 p3 <- citation_history |> 
   ggplot() +
-  geom_bar(aes(x=year, y=cites, fill=cites), stat="identity", position = "dodge", width = 0.75)+ 
-  geom_text(aes(x=year,y=cites+5,label=cites), size=3, nudge_y = 10)+ 
-  annotate("text", x = 2013, y = 60, 
-           label = paste(
-             "Total citations: ", profile$total_cites, "\n", 
-             "h-index: ", profile$h_index, "\n", 
-             "i10-index: ", profile$i10_index
-             ),
-           hjust = 0, vjust = 0, size = 3, color = "black"
-           ) +
+  geom_bar(
+    aes(x=year, y=cites, fill=cites), 
+    stat="identity", position = "dodge", width = 0.75
+    ) + 
+  geom_text(
+    aes(x=year,y=cites+5,label=cites), 
+    size=3, nudge_y = 10)+ 
+  annotate(
+    "text", x = 2013, y = 60, 
+    label = paste(
+      "Total citations: ", profile$total_cites, "\n", 
+      "h-index: ", profile$h_index, "\n", 
+      "i10-index: ", profile$i10_index
+      ),
+    hjust = 0, vjust = 0, size = 3, color = "black"
+    ) +
   labs(
     title = "Citations (2013-2024)", 
   ) +
@@ -221,9 +235,10 @@ p1 + p3 + plot_layout(ncol = 2)
 p2 + p3 + plot_layout(ncol = 2)
 
 
-ggsave("plots/google-scholar.png",
-       width = 6.5, height = 3, scale = 1,
-       bg = "white"
+ggsave(
+  "plots/google-scholar.png",
+  width = 6.5, height = 3, scale = 1,
+  bg = "white"
 )
 
 
