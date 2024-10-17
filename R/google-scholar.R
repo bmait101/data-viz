@@ -137,11 +137,16 @@ p1 <- pubs |>
 p1
 
 # plot stacked column chart of publication type by year
+pub_counts <- pubs |> 
+  group_by(type) |>
+  count()
+
 p2 <- pubs |> 
   ggplot(aes(x = year, fill = type)) +
   geom_bar(position = "stack", width = 0.75) + 
   scale_fill_manual(
-    values = c("Refereed" = "grey10", "Thesis" = "grey90", "Report" = "grey50")
+    values = c("Refereed" = "grey10", "Thesis" = "grey90", "Report" = "grey50"),
+    label = paste0(pub_counts$type, " (n=", pub_counts$n, ")")
     ) + 
   cowplot::theme_cowplot() +
   coord_capped_cart(bottom='both')+
@@ -158,13 +163,13 @@ p2 <- pubs |>
     axis.title.x = element_text(angle=0,color="black",hjust = 0.05,size=11),
     axis.text.x = element_text(size=9,color="grey30"),
     axis.line.y = element_blank(),
-    panel.grid.major.y = element_line(color="grey",linetype = 3),
+    panel.grid.major.y = element_line(color="grey", linetype = 3),
     axis.title.y.left = element_blank(), 
     axis.text.y = element_text(size=9,color="grey30"),
     plot.title = element_text(color="grey40",face = "bold",size=12),
     legend.position = "inside",
     legend.position.inside = c(0.05, .85), 
-    legend.text= element_text(size=9,color="grey30")
+    legend.text= element_text(size = 7,color = "black")
   )
 p2
 
@@ -186,11 +191,11 @@ ggplot(citation_history, aes(year, cites)) +
 p3 <- citation_history |> 
   ggplot() +
   geom_bar(
-    aes(x=year, y=cites, fill=cites), 
+    aes(x = year, y = cites, fill = cites), 
     stat="identity", position = "dodge", width = 0.75
     ) + 
   geom_text(
-    aes(x=year,y=cites+5,label=cites), 
+    aes(x = year, y = cites + 5, label = cites), 
     size=3, nudge_y = 10)+ 
   annotate(
     "text", x = 2013, y = 60, 
