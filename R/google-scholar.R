@@ -150,7 +150,6 @@ p2 <- pubs |>
     ) + 
   cowplot::theme_cowplot() +
   coord_capped_cart(bottom='both')+
-  # add x labels for each year
   scale_x_continuous(
     breaks = c(min(pubs$year),max(pubs$year)),
     limits = c(min(pubs$year)-0.5,max(pubs$year)+0.5)
@@ -198,7 +197,7 @@ p3 <- citation_history |>
     aes(x = year, y = cites + 5, label = cites), 
     size=3, nudge_y = 10)+ 
   annotate(
-    "text", x = 2013, y = 60, 
+    "text", x = 2013, y = 82, 
     label = paste(
       "Total citations: ", profile$total_cites, "\n", 
       "h-index: ", profile$h_index, "\n", 
@@ -210,8 +209,9 @@ p3 <- citation_history |>
     title = "Citations (2013-2024)", 
   ) +
   scale_fill_gradient2(
-    low="khaki2",mid="deepskyblue3",high="dodgerblue4", guide=FALSE, 
-    midpoint = quantile(citation_history$cites,probs = 0.85)) + 
+    low = "khaki2", mid = "deepskyblue3", high = "dodgerblue4", 
+    guide=FALSE, 
+    midpoint = quantile(citation_history$cites, probs = 0.85)) + 
   scale_x_continuous(
     expand = c(0,0),
     breaks = c(min(citation_history$year),max(citation_history$year)),
