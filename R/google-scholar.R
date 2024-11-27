@@ -31,16 +31,20 @@ profile <- get_profile(id)
 # Get my publications
 pubs <- get_publications(id) |> 
   as_tibble() |> 
-  arrange(year)
+  arrange(year) |>
+  rownames_to_column()
 
-# Remove the conference abstracts
-pubs <- filter(pubs, pubid != c("g5m5HwL7SMYC", "SeFeTyx0c_EC"))
+pubs |> 
+  print(n = Inf)
+
+pubs <- pubs |> 
+  filter(! rowname %in% c("27"))
 
 # Add a column for the publication type
 pubs <- pubs |> 
   mutate(type = case_when(
-    pubid %in% c("-f6ydRqryjwC","JV2RwH3_ST0C") ~ "Thesis",
-    pubid %in% c("7PzlFSSx8tAC","pqnbT2bcN3wC") ~ "Report",
+    rowname %in% c("4","15") ~ "Thesis",
+    rowname %in% c("1","18") ~ "Report",
     TRUE ~ "Refereed"
   ))
 
