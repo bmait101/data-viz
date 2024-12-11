@@ -147,7 +147,7 @@ pub_counts <- pubs |>
 
 p2 <- pubs |> 
   ggplot(aes(x = year, fill = type)) +
-  geom_bar(position = "stack", width = 0.75) + 
+  geom_bar(position = "stack", width = 0.5) + 
   scale_fill_manual(
     values = c("Refereed" = "grey10", "Thesis" = "grey90", "Report" = "grey50"),
     label = paste0(pub_counts$type, " (n=", pub_counts$n, ")")
@@ -158,8 +158,12 @@ p2 <- pubs |>
     breaks = c(min(pubs$year),max(pubs$year)),
     limits = c(min(pubs$year)-0.5,max(pubs$year)+0.5)
     ) +
+  scale_y_continuous(
+    breaks = seq(0, 6, 2),
+    limits = c(0, 6)
+    ) +
   labs(
-    title = "Publications (2013-2024)",
+    title = "Research Output (2013-2024)",
     x = "", y = "", fill = ""
   ) + 
   theme(
@@ -195,7 +199,7 @@ p3 <- citation_history |>
   ggplot() +
   geom_bar(
     aes(x = year, y = cites, fill = cites), 
-    stat="identity", position = "dodge", width = 0.75
+    stat="identity", position = "dodge", width = 0.5
     ) + 
   geom_text(
     aes(x = year, y = cites + 5, label = cites), 
