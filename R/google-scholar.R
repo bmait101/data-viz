@@ -155,15 +155,15 @@ p2 <- pubs |>
   cowplot::theme_cowplot() +
   coord_capped_cart(bottom='both')+
   scale_x_continuous(
-    breaks = c(min(pubs$year),max(pubs$year)),
-    limits = c(min(pubs$year)-0.5,max(pubs$year)+0.5)
+    breaks = c(min(pubs$year), max(pubs$year)+1),
+    limits = c(min(pubs$year)-0.5, max(pubs$year)+1.5)
     ) +
   scale_y_continuous(
     breaks = seq(0, 6, 2),
     limits = c(0, 6)
     ) +
   labs(
-    title = "Research Output (2013-2024)",
+    title = "Research Output (2013-2025)",
     x = "", y = "", fill = ""
   ) + 
   theme(
@@ -214,7 +214,7 @@ p3 <- citation_history |>
     hjust = 0, vjust = 0, size = 3, color = "black"
     ) +
   labs(
-    title = "Citations (2013-2024)", 
+    title = "Citations (2013-2025)", 
   ) +
   scale_fill_gradient2(
     low = "khaki2", mid = "deepskyblue3", high = "dodgerblue4", 
